@@ -9,13 +9,15 @@ import (
 )
 
 func main() {
-	src, err := os.ReadFile("test_input.way")
+	var file = string("test_input.way")
+
+	src, err := parser.Load(file)
 	if err != nil {
 		fmt.Println("error reading file:", err)
 		os.Exit(1)
 	}
 
-	tokens, err := parser.Tokenize(string(src))
+	tokens, err := parser.Tokenize(src)
 	if err != nil {
 		fmt.Println("error tokenizing:", err)
 		os.Exit(1)

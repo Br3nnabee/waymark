@@ -21,7 +21,7 @@ const (
 	TOK_SAY
 	TOK_TEXT
 	TOK_DIALOGUE // A quoted line
-	TOK_COMMENTs
+	TOK_COMMENTS
 )
 
 func (t TokenType) String() string {

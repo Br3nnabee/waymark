@@ -1,3 +1,5 @@
+include "city_map.way"
+
 scene tavern_job
 
     var quest_active = false
@@ -21,11 +23,3 @@ scene tavern_job
         "Not interested."
             set quest_active = false
             finish
-
-scene city_map
-
-    City map
-
-    choice
-        "Back"
-            go tavern_job

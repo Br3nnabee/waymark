@@ -11,6 +11,50 @@ type Parser struct {
 	pos    int
 }
 
+// Parse loads, tokenizes, and parses a .way file in one call.
+func ParseFile(path string) (*Story, error) {
+	src, err := Load(path)
+	if err != nil {
+		return nil, err
+	}
+	tokens, err := Tokenize(src)
+	if err != nil {
+		return nil, err
+	}
+	return Parse(tokens)
+}
+
+func (s *Story) Scene(name string) (*SceneNode, bool) {
+	for _, scene := range s.Scenes {
+		if scene.Name == name {
+			return scene, true
+		}
+	}
+	return nil, false
+}
+
+func Walk(nodes []Node, fn func(Node)) {
+	for _, n := range nodes {
+		fn(n)
+		switch v := n.(type) {
+		case *ChoiceNode:
+			for _, b := range v.Branches {
+				Walk(b.Body, fn)
+			}
+		}
+	}
+}
+
+func (s *SceneNode) Variables() []*VarNode {
+	var vars []*VarNode
+	Walk(s.Body, func(n Node) {
+		if v, ok := n.(*VarNode); ok {
+			vars = append(vars, v)
+		}
+	})
+	return vars
+}
+
 // Parse builds a Story AST from a flat token stream. Top-level tokens must be SCENE definitions.
 func Parse(tokens []Token) (*Story, error) {
 	p := &Parser{tokens: tokens}
