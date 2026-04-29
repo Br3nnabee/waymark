@@ -3,7 +3,7 @@ include "city_map.way"
 scene tavern_job
 
     var quest_active = false
-    local conversation_depth = 0
+    var conversation_depth = 0
 
     The barkeep slides a piece of paper across the bar.
 

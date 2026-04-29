@@ -5,14 +5,15 @@ import "github.com/XenomorphingTV/waymark/parser"
 type Engine struct {
 	story     *parser.Story
 	vars      map[string]any
-	callbacks []callback
+	callStack []frame
 	pos       cursor
 }
 
-type callback struct {
-	scene     *parser.SceneNode
-	pos       int
-	localvars map[string]any
+type frame struct {
+	scene    *parser.SceneNode
+	pos      int
+	locals   map[string]any
+	keepVars map[string]bool
 }
 
 type cursor struct {
@@ -23,6 +24,7 @@ type cursor struct {
 type State struct {
 	Lines   []Line
 	Choices []Choice
+	Done    bool
 }
 
 type Line struct {
@@ -33,4 +35,9 @@ type Line struct {
 type Choice struct {
 	Index int
 	Label string
+}
+
+type conditionParser struct {
+	input string
+	pos   int
 }

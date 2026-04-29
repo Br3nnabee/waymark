@@ -2,47 +2,51 @@ package main
 
 import (
 	"fmt"
-	"os"
 
-	"github.com/XenomorphingTV/waymark/exporter"
 	"github.com/XenomorphingTV/waymark/parser"
+	"github.com/XenomorphingTV/waymark/runtime"
 )
 
 func main() {
-	var file = string("test_input.way")
+	engine := runtime.New(&parser.Story{})
 
-	src, err := parser.Load(file)
-	if err != nil {
-		fmt.Println("error reading file:", err)
-		os.Exit(1)
+	// seed some variables
+	engine.SetVar("conversation_depth", 1)
+	engine.SetVar("quest_active", true)
+	engine.SetVar("player_strength", 10)
+	engine.SetVar("gate_locked", false)
+
+	tests := []struct {
+		cond string
+		want bool
+	}{
+		{"conversation_depth < 3", true},
+		{"conversation_depth > 3", false},
+		{"conversation_depth == 1", true},
+		{"quest_active", true},
+		{"not quest_active", false},
+		{"not gate_locked", true},
+		{"player_strength >= 10 and not gate_locked", true},
+		{"player_strength >= 10 and gate_locked", false},
+		{"conversation_depth < 3 or gate_locked", true},
+		{"conversation_depth > 3 or quest_active", true},
+		{"conversation_depth > 3 or gate_locked", false},
+		{"(conversation_depth < 3 and quest_active) or gate_locked", true},
+		{"conversation_depth < 3 and (quest_active or gate_locked)", true},
 	}
 
-	tokens, err := parser.Tokenize(src)
-	if err != nil {
-		fmt.Println("error tokenizing:", err)
-		os.Exit(1)
+	passed, failed := 0, 0
+	for _, tt := range tests {
+		got := engine.EvalCondition(tt.cond)
+		status := "PASS"
+		if got != tt.want {
+			status = "FAIL"
+			failed++
+		} else {
+			passed++
+		}
+		fmt.Printf("%s  %-50s got=%v want=%v\n", status, tt.cond, got, tt.want)
 	}
 
-	for _, tok := range tokens {
-		fmt.Printf("line %d indent %d type %v value %q condition %q\n",
-			tok.Line, tok.Indent, tok.Type, tok.Value, tok.Condition)
-	}
-
-	story, err := parser.Parse(tokens)
-	if err != nil {
-		fmt.Println("error parsing:", err)
-		os.Exit(1)
-	}
-
-	for _, scene := range story.Scenes {
-		fmt.Printf("scene: %s (%d nodes)\n", scene.Name, len(scene.Body))
-	}
-
-	data, err := exporter.Export(story)
-	if err != nil {
-		fmt.Println("error exporting:", err)
-		os.Exit(1)
-	}
-
-	fmt.Println(string(data))
+	fmt.Printf("\n%d passed, %d failed\n", passed, failed)
 }
