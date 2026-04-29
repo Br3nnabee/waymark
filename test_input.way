@@ -21,3 +21,11 @@ scene tavern_job
         "Not interested."
             set quest_active = false
             finish
+
+scene city_map
+
+    City map
+
+    choice
+        "Back"
+            go tavern_job

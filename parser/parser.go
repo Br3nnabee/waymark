@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -94,7 +95,7 @@ func (p *Parser) parseValDecl() (*VarNode, error) {
 
 	return &VarNode{
 		Name:     strings.TrimSpace(parts[0]),
-		Value:    strings.TrimSpace(parts[1]),
+		Value:    parseValue(strings.TrimSpace(parts[1])),
 		Lifetime: tok.Type,
 	}, nil
 }
@@ -148,6 +149,22 @@ func (p *Parser) parseBranch(indent int) (*BranchNode, error) {
 	}
 
 	return branch, nil
+}
+
+func parseValue(raw string) any {
+	if raw == "true" {
+		return true
+	}
+	if raw == "false" {
+		return false
+	}
+	if i, err := strconv.Atoi(raw); err == nil {
+		return i
+	}
+	if f, err := strconv.ParseFloat(raw, 64); err == nil {
+		return f
+	}
+	return strings.Trim(raw, `"`)
 }
 
 func (p *Parser) peek() Token {
